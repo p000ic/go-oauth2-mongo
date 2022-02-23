@@ -1,4 +1,4 @@
-module go-oauth2-mongo
+module github.com/p000ic/go-oauth2-mongo
 
 go 1.16
 
