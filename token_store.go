@@ -151,7 +151,7 @@ func (ts *TokenStore) cHandler(cltn string, handler func(c *qmgo.Collection)) {
 }
 
 // Create create and store the new token information
-func (ts *TokenStore) Create(info oauth2.TokenInfo) (err error) {
+func (ts *TokenStore) Create(ctx context.Context, info oauth2.TokenInfo) (err error) {
 	jsonInfo, err := json.Marshal(info)
 	if err != nil {
 		return

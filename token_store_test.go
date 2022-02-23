@@ -23,7 +23,7 @@ func TestTokenStore(t *testing.T) {
 				CodeCreateAt:  time.Now(),
 				CodeExpiresIn: time.Second * 5,
 			}
-			err := store.Create(info)
+			err := store.Create(store.ctx, info)
 			So(err, ShouldBeNil)
 
 			cinfo, err := store.GetByCode(info.Code)
@@ -48,7 +48,7 @@ func TestTokenStore(t *testing.T) {
 				AccessCreateAt:  time.Now(),
 				AccessExpiresIn: time.Second * 5,
 			}
-			err := store.Create(info)
+			err := store.Create(store.ctx, info)
 			So(err, ShouldBeNil)
 
 			ainfoT1, err := store.GetByAccess(info.GetAccess())
@@ -76,7 +76,7 @@ func TestTokenStore(t *testing.T) {
 				RefreshCreateAt:  time.Now(),
 				RefreshExpiresIn: time.Second * 15,
 			}
-			err := store.Create(info)
+			err := store.Create(store.ctx, info)
 			So(err, ShouldBeNil)
 
 			rinfoT1, err := store.GetByRefresh(info.GetRefresh())
