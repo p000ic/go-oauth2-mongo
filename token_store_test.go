@@ -26,14 +26,14 @@ func TestTokenStore(t *testing.T) {
 			err := store.Create(store.ctx, info)
 			So(err, ShouldBeNil)
 
-			cinfo, err := store.GetByCode(info.Code)
+			cinfo, err := store.GetByCode(store.ctx, info.Code)
 			So(err, ShouldBeNil)
 			So(cinfo.GetUserID(), ShouldEqual, info.UserID)
 
-			err = store.RemoveByCode(info.Code)
+			err = store.RemoveByCode(store.ctx, info.Code)
 			So(err, ShouldBeNil)
 
-			cinfo, err = store.GetByCode(info.Code)
+			cinfo, err = store.GetByCode(store.ctx, info.Code)
 			So(err, ShouldBeNil)
 			So(cinfo, ShouldBeNil)
 		})
@@ -51,14 +51,14 @@ func TestTokenStore(t *testing.T) {
 			err := store.Create(store.ctx, info)
 			So(err, ShouldBeNil)
 
-			ainfoT1, err := store.GetByAccess(info.GetAccess())
+			ainfoT1, err := store.GetByAccess(store.ctx, info.GetAccess())
 			So(err, ShouldBeNil)
 			So(ainfoT1.GetUserID(), ShouldEqual, info.GetUserID())
 
-			err = store.RemoveByAccess(info.GetAccess())
+			err = store.RemoveByAccess(store.ctx, info.GetAccess())
 			So(err, ShouldBeNil)
 
-			ainfoT2, err := store.GetByAccess(info.GetAccess())
+			ainfoT2, err := store.GetByAccess(store.ctx, info.GetAccess())
 			So(err, ShouldBeNil)
 			So(ainfoT2, ShouldBeNil)
 		})
@@ -79,14 +79,14 @@ func TestTokenStore(t *testing.T) {
 			err := store.Create(store.ctx, info)
 			So(err, ShouldBeNil)
 
-			rinfoT1, err := store.GetByRefresh(info.GetRefresh())
+			rinfoT1, err := store.GetByRefresh(store.ctx, info.GetRefresh())
 			So(err, ShouldBeNil)
 			So(rinfoT1.GetUserID(), ShouldEqual, info.GetUserID())
 
-			err = store.RemoveByRefresh(info.GetRefresh())
+			err = store.RemoveByRefresh(store.ctx, info.GetRefresh())
 			So(err, ShouldBeNil)
 
-			rinfoT2, err := store.GetByRefresh(info.GetRefresh())
+			rinfoT2, err := store.GetByRefresh(store.ctx, info.GetRefresh())
 			So(err, ShouldBeNil)
 			So(rinfoT2, ShouldBeNil)
 		})

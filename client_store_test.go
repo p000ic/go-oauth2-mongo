@@ -19,13 +19,13 @@ func TestClientStore(t *testing.T) {
 
 	Convey("Set", t, func() {
 		Convey("Success", func() {
-			_ = store.RemoveByID(client.ID)
+			_ = store.RemoveByID(store.ctx, client.ID)
 			err := store.Set(client)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("AlreadyExistingClient", func() {
-			_ = store.RemoveByID(client.ID)
+			_ = store.RemoveByID(store.ctx, client.ID)
 			_ = store.Set(client)
 			err := store.Set(client)
 			So(err, ShouldNotBeNil)
@@ -34,22 +34,22 @@ func TestClientStore(t *testing.T) {
 
 	Convey("GetByID", t, func() {
 		Convey("Success", func() {
-			_ = store.RemoveByID(client.ID)
+			_ = store.RemoveByID(store.ctx, client.ID)
 			_ = store.Set(client)
-			got, err := store.GetByID(client.ID)
+			got, err := store.GetByID(store.ctx, client.ID)
 			So(err, ShouldBeNil)
 			So(got, ShouldResemble, client)
 		})
 
 		Convey("UnknownClient", func() {
-			_, err := store.GetByID("unknown_client")
+			_, err := store.GetByID(store.ctx, "unknown_client")
 			So(err, ShouldNotBeNil)
 		})
 	})
 
 	Convey("RemoveByID", t, func() {
 		Convey("UnknownClient", func() {
-			err := store.RemoveByID("unknown_client")
+			err := store.RemoveByID(store.ctx, "unknown_client")
 			So(err, ShouldNotBeNil)
 		})
 	})

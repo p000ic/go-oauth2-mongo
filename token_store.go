@@ -225,7 +225,7 @@ func (ts *TokenStore) Create(ctx context.Context, info oauth2.TokenInfo) (err er
 }
 
 // RemoveByCode use the authorization code to delete the token information
-func (ts *TokenStore) RemoveByCode(code string) (err error) {
+func (ts *TokenStore) RemoveByCode(ctx context.Context, code string) (err error) {
 	ts.cloneSession()
 	verr := ts.c(ts.tcfg.BasicCName).Remove(ts.ctx, basicData{Code: code})
 	if verr != nil {
@@ -238,7 +238,7 @@ func (ts *TokenStore) RemoveByCode(code string) (err error) {
 }
 
 // RemoveByAccess use the access token to delete the token information
-func (ts *TokenStore) RemoveByAccess(access string) (err error) {
+func (ts *TokenStore) RemoveByAccess(ctx context.Context, access string) (err error) {
 	ts.cloneSession()
 	basicID, err := ts.getByToken(ts.tcfg.AccessCName, access)
 	fn := func(sCtx context.Context) (interface{}, error) {
@@ -263,7 +263,7 @@ func (ts *TokenStore) RemoveByAccess(access string) (err error) {
 }
 
 // RemoveByRefresh use the refresh token to delete the token information
-func (ts *TokenStore) RemoveByRefresh(refresh string) (err error) {
+func (ts *TokenStore) RemoveByRefresh(ctx context.Context, refresh string) (err error) {
 	ts.cloneSession()
 	basicID, err := ts.getByToken(ts.tcfg.RefreshCName, refresh)
 	fn := func(sCtx context.Context) (interface{}, error) {
@@ -322,13 +322,13 @@ func (ts *TokenStore) getByToken(cltn, token string) (basicID string, err error)
 }
 
 // GetByCode use the authorization code for token information data
-func (ts *TokenStore) GetByCode(code string) (ti oauth2.TokenInfo, err error) {
+func (ts *TokenStore) GetByCode(ctx context.Context, code string) (ti oauth2.TokenInfo, err error) {
 	ti, err = ts.getData(code)
 	return
 }
 
 // GetByAccess use the access token for token information data
-func (ts *TokenStore) GetByAccess(access string) (ti oauth2.TokenInfo, err error) {
+func (ts *TokenStore) GetByAccess(ctx context.Context, access string) (ti oauth2.TokenInfo, err error) {
 	basicID, err := ts.getByToken(ts.tcfg.AccessCName, access)
 	if err != nil && basicID == "" {
 		return
@@ -338,7 +338,7 @@ func (ts *TokenStore) GetByAccess(access string) (ti oauth2.TokenInfo, err error
 }
 
 // GetByRefresh use the refresh token for token information data
-func (ts *TokenStore) GetByRefresh(refresh string) (ti oauth2.TokenInfo, err error) {
+func (ts *TokenStore) GetByRefresh(ctx context.Context, refresh string) (ti oauth2.TokenInfo, err error) {
 	basicID, err := ts.getByToken(ts.tcfg.RefreshCName, refresh)
 	if err != nil && basicID == "" {
 		return

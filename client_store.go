@@ -135,7 +135,7 @@ func (cs *ClientStore) Set(info oauth2.ClientInfo) (err error) {
 }
 
 // GetByID according to the ID for the client information
-func (cs *ClientStore) GetByID(id string) (info oauth2.ClientInfo, err error) {
+func (cs *ClientStore) GetByID(ctx context.Context, id string) (info oauth2.ClientInfo, err error) {
 	cs.cloneSession()
 	err = nil
 	cs.cHandler(cs.ccfg.ClientsCName, func(c *qmgo.Collection) {
@@ -156,7 +156,7 @@ func (cs *ClientStore) GetByID(id string) (info oauth2.ClientInfo, err error) {
 }
 
 // RemoveByID use the client id to delete the client information
-func (cs *ClientStore) RemoveByID(id string) error {
+func (cs *ClientStore) RemoveByID(ctx context.Context, id string) error {
 	cs.cloneSession()
 	err := cs.c(cs.ccfg.ClientsCName).Remove(cs.ctx, client{ID: id})
 	if err != nil {
