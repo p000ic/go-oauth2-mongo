@@ -1,6 +1,6 @@
 module go-oauth2-mongo
 
-go 1.17
+go 1.16
 
 require (
 	github.com/go-oauth2/oauth2/v4 v4.4.3
