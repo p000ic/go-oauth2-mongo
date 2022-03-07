@@ -1,6 +1,6 @@
 # Mongo Storage for [OAuth 2.0 V4](https://github.com/go-oauth2/oauth2)
 
-golang 1.17 =>
+golang > / = 1.16 
 
 ## Install
 
