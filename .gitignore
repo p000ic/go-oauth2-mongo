@@ -1,1 +1,6 @@
 .vscode/
+/.idea/go-oauth2-mongo.iml
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/.gitignore

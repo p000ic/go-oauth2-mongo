@@ -9,21 +9,23 @@ import (
 )
 
 var (
-	auth     bool
-	username string
-	password string
-	host     string
-	port     int
-	source   string
-	mongo    = &dbase{}
+	auth       bool
+	username   string
+	password   string
+	host       string
+	port       int
+	source     string
+	authsource string
+	mongo      = &dbase{}
 )
 
 type dbase struct {
-	ctx     context.Context
-	session *qmgo.Session
-	source  *qmgo.Database
-	client  *qmgo.Client
-	dbname  string
+	ctx        context.Context
+	session    *qmgo.Session
+	source     *qmgo.Database
+	client     *qmgo.Client
+	authDBName string
+	dbname     string
 }
 
 // testConfig - initialize Mongo for tests
@@ -39,7 +41,7 @@ func testConfig() {
 			AuthMechanism: "SCRAM-SHA-1",
 			Username:      username,
 			Password:      password,
-			AuthSource:    source,
+			AuthSource:    authsource,
 		}
 	}
 

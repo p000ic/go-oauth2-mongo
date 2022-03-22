@@ -14,7 +14,7 @@ go get -u -v github.com/initial-commit-hq/go-oauth2-mongo
 package main
 
 import (
- "github.com/initial-commit-hq/go-oauth2-mongo"
+ "github.com/p000ic/go-oauth2-mongo"
  "github.com/go-oauth2/oauth2/v4/manage"
 )
 
@@ -22,8 +22,8 @@ func main() {
  manager := manage.NewDefaultManager()
 
  // use mongodb token store
- manager.MapTokenStorage(
-  mongo.NewTokenStore(mongo.NewConfig(
+ manager.MapTokenStorage(mongo.NewTokenStore(
+   mongo.NewConfig(
   "mongodb://127.0.0.1:27017", 
   "oauth2", 
   username, 

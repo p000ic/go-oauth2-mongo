@@ -10,6 +10,7 @@ import (
 	"github.com/qiniu/qmgo/options"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	mongoOpts "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type client struct {
@@ -75,34 +76,42 @@ func NewClientStore(cfg *Config, ccfgs ...*ClientConfig) *ClientStore {
 
 // NewClientStoreWithSession create a client store instance based on mongodb
 func NewClientStoreWithSession(cs *ClientStore, ccfgs ...*ClientConfig) *ClientStore {
-	cs.cloneSession()
+	err := cs.cloneSession()
+	if err != nil {
+		return nil
+	}
 	defer cs.session.EndSession(cs.ctx)
 
 	cs.ccfg = NewDefaultClientConfig()
 	if len(ccfgs) > 0 {
 		cs.ccfg = ccfgs[0]
 	}
-
+	t := true
 	_ = cs.c(cs.ccfg.ClientsCName).CreateIndexes(cs.ctx, []options.IndexModel{{
-		Key:    []string{"id"},
-		Unique: true},
+		Key: []string{"id"},
+		IndexOptions: &mongoOpts.IndexOptions{
+			Unique: &t,
+		}},
 	})
 
 	return cs
 }
 
-// Close close the mongo session
+// Close mongo session
 func (cs *ClientStore) Close() {
-	cs.client.Close(cs.ctx)
+	err := cs.client.Close(cs.ctx)
+	if err != nil {
+		return
+	}
 }
 
-func (cs *ClientStore) cloneSession() (*ClientStore, error) {
+func (cs *ClientStore) cloneSession() error {
 	var err error
 	cs.session, err = cs.client.Session()
 	if err != nil {
-		return cs, err
+		return err
 	}
-	return cs, nil
+	return nil
 }
 
 func (cs *ClientStore) c(cltn string) *qmgo.Collection {
@@ -110,14 +119,21 @@ func (cs *ClientStore) c(cltn string) *qmgo.Collection {
 }
 
 func (cs *ClientStore) cHandler(cltn string, handler func(c *qmgo.Collection)) {
-	cs.client.Session()
+	_, err := cs.client.Session()
+	if err != nil {
+		return
+	}
 	defer cs.session.EndSession(cs.ctx)
 	handler(cs.source.Collection(cltn))
 }
 
-// Set set client information
+// Set client information
 func (cs *ClientStore) Set(info oauth2.ClientInfo) (err error) {
-	cs.cloneSession()
+	err = nil
+	err = cs.cloneSession()
+	if err != nil {
+		return err
+	}
 	cs.cHandler(cs.ccfg.ClientsCName, func(c *qmgo.Collection) {
 		entity := &client{
 			ID:     info.GetID(),
@@ -136,11 +152,14 @@ func (cs *ClientStore) Set(info oauth2.ClientInfo) (err error) {
 
 // GetByID according to the ID for the client information
 func (cs *ClientStore) GetByID(ctx context.Context, id string) (info oauth2.ClientInfo, err error) {
-	cs.cloneSession()
 	err = nil
+	err = cs.cloneSession()
+	if err != nil {
+		return nil, err
+	}
 	cs.cHandler(cs.ccfg.ClientsCName, func(c *qmgo.Collection) {
 		entity := new(client)
-		cerr := c.Find(cs.ctx, bson.M{"id": id}).One(entity)
+		cerr := c.Find(ctx, bson.M{"id": id}).One(entity)
 		if cerr != nil {
 			err = cerr
 			return
@@ -157,8 +176,11 @@ func (cs *ClientStore) GetByID(ctx context.Context, id string) (info oauth2.Clie
 
 // RemoveByID use the client id to delete the client information
 func (cs *ClientStore) RemoveByID(ctx context.Context, id string) error {
-	cs.cloneSession()
-	err := cs.c(cs.ccfg.ClientsCName).Remove(cs.ctx, client{ID: id})
+	err := cs.cloneSession()
+	if err != nil {
+		return err
+	}
+	err = cs.c(cs.ccfg.ClientsCName).Remove(ctx, client{ID: id})
 	if err != nil {
 		return err
 	}

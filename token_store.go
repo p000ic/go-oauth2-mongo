@@ -12,6 +12,7 @@ import (
 	"github.com/qiniu/qmgo"
 	"github.com/qiniu/qmgo/options"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	mongoOpts "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type txn struct {
@@ -111,17 +112,23 @@ func NewTokenStoreWithSession(ts *TokenStore, tcfgs ...*TokenConfig) *TokenStore
 	}
 	exp := int32(1)
 	_ = ts.c(ts.tcfg.BasicCName).CreateIndexes(ts.ctx, []options.IndexModel{{
-		Key:                []string{"ExpiredAt"},
-		ExpireAfterSeconds: &exp},
+		Key: []string{"ExpiredAt"},
+		IndexOptions: &mongoOpts.IndexOptions{
+			ExpireAfterSeconds: &exp,
+		}},
 	})
 	_ = ts.c(ts.tcfg.AccessCName).CreateIndexes(ts.ctx, []options.IndexModel{{
-		Key:                []string{"ExpiredAt"},
-		ExpireAfterSeconds: &exp},
+		Key: []string{"ExpiredAt"},
+		IndexOptions: &mongoOpts.IndexOptions{
+			ExpireAfterSeconds: &exp,
+		}},
 	})
 
 	_ = ts.c(ts.tcfg.RefreshCName).CreateIndexes(ts.ctx, []options.IndexModel{{
-		Key:                []string{"ExpiredAt"},
-		ExpireAfterSeconds: &exp},
+		Key: []string{"ExpiredAt"},
+		IndexOptions: &mongoOpts.IndexOptions{
+			ExpireAfterSeconds: &exp,
+		}},
 	})
 	return ts
 }
