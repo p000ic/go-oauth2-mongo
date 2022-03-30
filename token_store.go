@@ -57,17 +57,16 @@ type TokenStore struct {
 
 var (
 	tRUEts  = true
-	fALSEts = false
 	storeTS = &TokenStore{}
 )
 
 // NewDefaultTokenConfig create a default token configuration
 func NewDefaultTokenConfig() *TokenConfig {
 	return &TokenConfig{
-		TxnCName:     "oauth2_txn",
-		BasicCName:   "oauth2_basic",
-		AccessCName:  "oauth2_access",
-		RefreshCName: "oauth2_refresh",
+		TxnCName:     "txn",
+		BasicCName:   "basic",
+		AccessCName:  "access",
+		RefreshCName: "refresh",
 	}
 }
 
@@ -103,7 +102,10 @@ func NewTokenStore(cfg *Config, tcfgs ...*TokenConfig) *TokenStore {
 
 // NewTokenStoreWithSession create a token store instance based on mongodb
 func NewTokenStoreWithSession(ts *TokenStore, tcfgs ...*TokenConfig) *TokenStore {
-	ts.cloneSession()
+	_, err := ts.cloneSession()
+	if err != nil {
+		return ts
+	}
 	defer ts.session.EndSession(ts.ctx)
 
 	ts.tcfg = NewDefaultTokenConfig()
@@ -133,9 +135,12 @@ func NewTokenStoreWithSession(ts *TokenStore, tcfgs ...*TokenConfig) *TokenStore
 	return ts
 }
 
-// Close close the mongo session
+// Close - close the mongo session
 func (ts *TokenStore) Close() {
-	ts.client.Close(ts.ctx)
+	err := ts.client.Close(ts.ctx)
+	if err != nil {
+		return
+	}
 }
 
 func (ts *TokenStore) cloneSession() (*TokenStore, error) {
@@ -152,7 +157,10 @@ func (ts *TokenStore) c(cltn string) *qmgo.Collection {
 }
 
 func (ts *TokenStore) cHandler(cltn string, handler func(c *qmgo.Collection)) {
-	ts.client.Session()
+	_, err := ts.client.Session()
+	if err != nil {
+		return
+	}
 	defer ts.session.EndSession(ts.ctx)
 	handler(ts.source.Collection(cltn))
 }
@@ -233,7 +241,10 @@ func (ts *TokenStore) Create(ctx context.Context, info oauth2.TokenInfo) (err er
 
 // RemoveByCode use the authorization code to delete the token information
 func (ts *TokenStore) RemoveByCode(ctx context.Context, code string) (err error) {
-	ts.cloneSession()
+	_, err = ts.cloneSession()
+	if err != nil {
+		return err
+	}
 	verr := ts.c(ts.tcfg.BasicCName).Remove(ts.ctx, basicData{Code: code})
 	if verr != nil {
 		if verr == qmgo.ErrNoSuchDocuments {
@@ -246,7 +257,10 @@ func (ts *TokenStore) RemoveByCode(ctx context.Context, code string) (err error)
 
 // RemoveByAccess use the access token to delete the token information
 func (ts *TokenStore) RemoveByAccess(ctx context.Context, access string) (err error) {
-	ts.cloneSession()
+	_, err = ts.cloneSession()
+	if err != nil {
+		return err
+	}
 	basicID, err := ts.getByToken(ts.tcfg.AccessCName, access)
 	fn := func(sCtx context.Context) (interface{}, error) {
 		verr := ts.c(ts.tcfg.AccessCName).Remove(ts.ctx, tokenData{Token: access})
@@ -271,7 +285,10 @@ func (ts *TokenStore) RemoveByAccess(ctx context.Context, access string) (err er
 
 // RemoveByRefresh use the refresh token to delete the token information
 func (ts *TokenStore) RemoveByRefresh(ctx context.Context, refresh string) (err error) {
-	ts.cloneSession()
+	_, err = ts.cloneSession()
+	if err != nil {
+		return err
+	}
 	basicID, err := ts.getByToken(ts.tcfg.RefreshCName, refresh)
 	fn := func(sCtx context.Context) (interface{}, error) {
 		verr := ts.c(ts.tcfg.RefreshCName).Remove(ts.ctx, tokenData{Token: refresh})
@@ -295,7 +312,10 @@ func (ts *TokenStore) RemoveByRefresh(ctx context.Context, refresh string) (err 
 }
 
 func (ts *TokenStore) getData(basicID string) (ti oauth2.TokenInfo, err error) {
-	ts.cloneSession()
+	_, err = ts.cloneSession()
+	if err != nil {
+		return nil, err
+	}
 	var bd basicData
 	bd.Code = basicID
 	verr := ts.c(ts.tcfg.BasicCName).Find(ts.ctx, bd).One(&bd)
@@ -316,7 +336,10 @@ func (ts *TokenStore) getData(basicID string) (ti oauth2.TokenInfo, err error) {
 }
 
 func (ts *TokenStore) getByToken(cltn, token string) (basicID string, err error) {
-	ts.cloneSession()
+	_, err = ts.cloneSession()
+	if err != nil {
+		return "", err
+	}
 	var td tokenData
 	err = ts.c(cltn).Find(ts.ctx, tokenData{Token: token}).One(&td)
 	if err != nil {

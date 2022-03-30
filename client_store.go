@@ -40,7 +40,7 @@ var (
 // NewDefaultClientConfig create a default client configuration
 func NewDefaultClientConfig() *ClientConfig {
 	return &ClientConfig{
-		ClientsCName: "oauth2_clients",
+		ClientsCName: "clients",
 	}
 }
 
